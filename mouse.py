@@ -15,8 +15,8 @@ file = open("/dev/input/by-id/usb-04f3_PS_2+USB_Mouse-event-mouse","rb")
 
 while True:
 
-    DistanceSensor = gp2y0e02b.GP2Y0E02B()
-    print DistanceSensor.value()
+    #DistanceSensor = gp2y0e02b.GP2Y0E02B()
+    #print DistanceSensor.value()
     byte = file.read(16)
     #h = ":".join("{:02x}".format(ord(c)) for c in byte)
     #print "byte=",h
@@ -25,24 +25,20 @@ while True:
     #print 'type = %d, code = %d, value = %d' % (type, code, value)
 
     if type == 1 and value == 1:
+        servo = open("/dev/pi-blaster", "w")
         if code == 272:
             print "LEFT PRESS"
-            servo = open("/dev/pi-blaster", "w")
             servo.write('17=0.01\n')
-            servo.close()
-            servo = open("/dev/pi-blaster", "w")
             servo.write('22=0.01\n')
-            servo.close()
         if code == 273:
             print "RIGHT PRESS"
-            servo = open("/dev/pi-blaster", "w")
-            servo.write('17=0.2\n')
-            servo.close()
-            servo = open("/dev/pi-blaster", "w")
-            servo.write('22=0.2\n')
-            servo.close()
+            servo.write('17=0.19\n')
+            servo.write('22=0.19\n')
+        servo.close()
 
     if type == 2:
+        if code == 8:
+            print "SCROLL",value
         if code == 0:
             print "MOVE L/R",value    
             '''

@@ -2,8 +2,9 @@
 
 import struct
 import binhex
-x = 0.150
-y = 0.150
+import gp2y0e02b
+x = 0
+y = 0
 
 # You'll need to find the name of your particular mouse to put in here.
 # Here is how:
@@ -14,6 +15,8 @@ file = open("/dev/input/by-id/usb-04f3_PS_2+USB_Mouse-event-mouse","rb")
 
 while True:
 
+    DistanceSensor = gp2y0e02b.GP2Y0E02B()
+    print DistanceSensor.value()
     byte = file.read(16)
     #h = ":".join("{:02x}".format(ord(c)) for c in byte)
     #print "byte=",h
@@ -42,6 +45,7 @@ while True:
     if type == 2:
         if code == 0:
             print "MOVE L/R",value    
+            '''
             # limit the value of x to 1 - 20 (0.1 - 0.2)
             if(x < 0.2 and value > 0):
                 x = x + 0.001
@@ -55,8 +59,10 @@ while True:
             servo = open("/dev/pi-blaster", "w")
             servo.write('17=%s\n' %str(x))
             servo.close()
+            '''
         if code == 1:
             print "MOVE U/D",value
+            '''
             # limit the value of x to 1 - 20 (0.1 - 0.2)
             if(y < 0.2 and value > 0):
                 y = y + 0.001
@@ -69,4 +75,5 @@ while True:
             print 'y=%.2f' %y
             servo = open("/dev/pi-blaster", "w")
             servo.write('22=%s\n' %str(y))
-            servo.close()            
+            servo.close()   
+'''            

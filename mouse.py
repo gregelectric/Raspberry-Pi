@@ -2,7 +2,13 @@
 
 import struct
 import binhex
-import gp2y0e02b
+import smbus
+import time
+
+bus = smbus.SMBus(1)    # 0 = /dev/i2c-0 (port I2C0), 1 = /dev/i2c-1 (port I2C1)
+distance = 0  
+servo_angle = 0.012  
+servo_direction = 1
 x = 0
 y = 0
 
@@ -12,11 +18,28 @@ y = 0
 # Find your mouse and substitute below
 file = open("/dev/input/by-id/usb-04f3_PS_2+USB_Mouse-event-mouse","rb")
 
-
 while True:
+    # Pan Servo 180 degrees
+    if (servo_angle > 0.12 and servo_direction == 1):
+        servo_direction = 0
+    elif (servo_angle < 0.03 and servo_direction == 0):
+        servo_direction = 1
+     
+    if(servo_direction == 1): 
+        servo_angle = servo_angle + 0.005
+    else:
+        servo_angle = servo_angle - 0.005
+   
+    #print 'servo angle=%.3f' %servo_angle
+    servo = open("/dev/pi-blaster", "w")
+    servo.write('22=%s\n' %str(servo_angle))
+    servo.close()
+    time.sleep(0.1)
 
-    #DistanceSensor = gp2y0e02b.GP2Y0E02B()
-    #print DistanceSensor.value()
+    distance = bus.read_i2c_block_data(0x40, 0x5E, 1)
+    distance2 = float(distance.pop(0))
+    print 'distance=%.2f' %distance2       
+"""
     byte = file.read(16)
     #h = ":".join("{:02x}".format(ord(c)) for c in byte)
     #print "byte=",h
@@ -28,48 +51,16 @@ while True:
         servo = open("/dev/pi-blaster", "w")
         if code == 272:
             print "LEFT PRESS"
-            servo.write('17=0.01\n')
-            servo.write('22=0.01\n')
+            servo.write('17=0.012\n')
         if code == 273:
             print "RIGHT PRESS"
-            servo.write('17=0.19\n')
-            servo.write('22=0.19\n')
+            servo.write('17=0.03\n')
         servo.close()
-
     if type == 2:
         if code == 8:
             print "SCROLL",value
         if code == 0:
             print "MOVE L/R",value    
-            '''
-            # limit the value of x to 1 - 20 (0.1 - 0.2)
-            if(x < 0.2 and value > 0):
-                x = x + 0.001
-            if(x > 0 and value < 0):
-                x = x - 0.001                
-            if x > 0.2:
-               x = 0.2
-            if x < 0.001:
-               x = 0.001
-            print 'x=%.2f' %x
-            servo = open("/dev/pi-blaster", "w")
-            servo.write('17=%s\n' %str(x))
-            servo.close()
-            '''
         if code == 1:
-            print "MOVE U/D",value
-            '''
-            # limit the value of x to 1 - 20 (0.1 - 0.2)
-            if(y < 0.2 and value > 0):
-                y = y + 0.001
-            if(y > 0 and value < 0):
-                y = y - 0.001                
-            if y > 0.2:
-               y = 0.2
-            if y < 0.001:
-               y = 0.001
-            print 'y=%.2f' %y
-            servo = open("/dev/pi-blaster", "w")
-            servo.write('22=%s\n' %str(y))
-            servo.close()   
-'''            
+            print "MOVE U/D",value 
+"""            
